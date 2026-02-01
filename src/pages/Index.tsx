@@ -2,8 +2,10 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Categories from "@/components/Categories";
 import Destinations from "@/components/Destinations";
+import Gallery from "@/components/Gallery";
 import SeasonalHighlights from "@/components/SeasonalHighlights";
 import FlightBooking from "@/components/FlightBooking";
+import NearbyExplorer from "@/components/NearbyExplorer";
 import PlanTrip from "@/components/PlanTrip";
 import Partners from "@/components/Partners";
 import TravelInfo from "@/components/TravelInfo";
@@ -16,8 +18,10 @@ const Index = () => {
       <Hero />
       <Categories />
       <Destinations />
+      <Gallery />
       <SeasonalHighlights />
       <FlightBooking />
+      <NearbyExplorer />
       <PlanTrip />
       <Partners />
       <TravelInfo />
