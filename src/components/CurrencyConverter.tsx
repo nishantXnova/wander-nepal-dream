@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ArrowRightLeft, RefreshCw, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const currencies = [
@@ -28,27 +27,38 @@ const CurrencyConverter = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const convert = async () => {
+  const convert = useCallback(async () => {
     if (!amount || isNaN(Number(amount))) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("currency-converter", {
-        body: { from, to, amount: Number(amount) },
-      });
-      if (error) throw error;
-      if (data.error) throw new Error(data.error);
-      setResult(data.converted);
-      setRate(data.rate);
-    } catch (err: any) {
-      toast({ title: "Conversion failed", description: err.message, variant: "destructive" });
+      const response = await fetch(
+        `https://open.er-api.com/v6/latest/${from}`
+      );
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.result !== "success") {
+        throw new Error("Failed to fetch exchange rates");
+      }
+      const fetchedRate = data.rates?.[to];
+      if (!fetchedRate) {
+        throw new Error(`Rate not found for ${to}`);
+      }
+      const converted = (Number(amount) * fetchedRate).toFixed(2);
+      setResult(converted);
+      setRate(fetchedRate);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      toast({ title: "Conversion failed", description: message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
-  };
+  }, [amount, from, to, toast]);
 
   useEffect(() => {
     convert();
-  }, [from, to]);
+  }, [convert]);
 
   const swap = () => {
     setFrom(to);
